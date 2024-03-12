@@ -28,5 +28,5 @@ jobs:
               git clone https://github.com/lmartins18/simpleApplication.git
               cd ${REPO_NAME}
               sudo npm i &&
-              sudo pm2 stop ./bin/www &&
+              sudo npm install pm2 &&
               sudo pm2 start ./bin/www
