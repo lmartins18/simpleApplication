@@ -21,7 +21,7 @@ jobs:
     steps: 
       - name: Checkout repo
         uses: actions/checkout@v4
-        
+
       - name: Get certificate
         run: | 
           echo ${PRIVATE_KEY} > privatekey.pem
@@ -40,6 +40,9 @@ jobs:
     needs: Build
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
       - name: Configure SSH
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -56,7 +59,8 @@ jobs:
             IdentityFile ~/.ssh/deploy.key
             StrictHostKeyChecking no
           END
-        
+      - name: Ensure docker is installed
+        run: ssh deploy 'bash -s' < ./aws/scripts/install_docker.sh
       - name: Pull Docker image
         run: ssh deploy 'docker pull $DOCKER_USERNAME/${DOCKER_IMAGE}:${BUILD_NUMBER}'
       
