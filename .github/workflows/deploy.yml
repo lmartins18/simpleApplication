@@ -10,6 +10,7 @@ env:
   DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
   BUILD_NUMBER: ${{ github.run_number }}
 
+
 jobs:
   Build:
     name: Build
@@ -18,6 +19,9 @@ jobs:
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
       SERVER: ${{ secrets.SERVER }}
     steps: 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        
       - name: Get certificate
         run: | 
           echo ${PRIVATE_KEY} > privatekey.pem
@@ -33,6 +37,7 @@ jobs:
         run: docker push $DOCKER_USERNAME/${DOCKER_IMAGE}:${BUILD_NUMBER}
   Deploy:
     name: Deploy to EC2
+    needs: Build
     runs-on: ubuntu-latest
     steps:
       - name: Configure SSH
