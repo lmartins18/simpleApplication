@@ -1,8 +1,8 @@
-name: Deploy
+name: Deploy-prod
 
 on:
   push:
-    branches: [ dev ]
+    branches: [ main ]
 
 env:
   DOCKER_USERNAME:  ${{ secrets.DOCKER_USERNAME }}
@@ -70,5 +70,7 @@ jobs:
       - name: Pull Docker image
         run: ssh deploy "sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
-      - name: Run Docker image
-        run: ssh deploy "sudo docker run -p 8443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+      - name: Run Docker container
+        run: |
+          ssh deploy "sudo docker stop simple-application || true"
+          ssh deploy "docker run --name ${DOCKER_IMAGE} --rm -dp 8443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
