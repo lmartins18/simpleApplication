@@ -1,0 +1,76 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  DOCKER_USERNAME:  ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_TOKEN:  ${{ secrets.DOCKER_TOKEN }}
+  DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
+  BUILD_NUMBER: ${{ github.run_number }}
+
+
+jobs:
+  Build:
+    name: Build
+    runs-on: ubuntu-latest
+    env: 
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      SERVER: ${{ secrets.SERVER }}
+    steps: 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get certificate
+        run: | 
+          echo ${PRIVATE_KEY} > privatekey.pem
+          echo ${SERVER} > server.crt
+          
+      - name: Docker login
+        run: echo "${DOCKER_TOKEN}" | docker login -u ${DOCKER_USERNAME} --password-stdin
+      
+      - name: Docker build
+        run: docker build -t $DOCKER_USERNAME/${DOCKER_IMAGE}:${BUILD_NUMBER} .
+      
+      - name: Docker push 
+        run: docker push $DOCKER_USERNAME/${DOCKER_IMAGE}:${BUILD_NUMBER}
+  Deploy:
+    name: Deploy to EC2
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.USER_NAME }}
+          DOCKER_USERNAME:  ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN:  ${{ secrets.DOCKER_TOKEN }}
+          DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${SSH_KEY}" > ~/.ssh/deploy.key
+          chmod 600 ~/.ssh/deploy.key
+          cat >>~/.ssh/config <<END
+          Host deploy
+            HostName ${SSH_HOST}
+            User ${SSH_USER}
+            IdentityFile ~/.ssh/deploy.key
+            StrictHostKeyChecking no
+          END
+
+      - name: Ensure docker is installed
+        run: ssh deploy 'bash -s' < ./aws/scripts/install_docker.sh
+
+      - name: Pull Docker image
+        run: ssh deploy "sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+      
+      - name: Run Docker container
+        run: |
+          ssh deploy "sudo docker stop simple-application || true"
+          ssh deploy "sudo docker run --name ${DOCKER_IMAGE} --rm -dp 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
