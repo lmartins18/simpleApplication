@@ -27,7 +27,7 @@ jobs:
 
               # Now we have got the access of EC2 and we will start the deploy .
               cd ~ &&
-              git clone ${REPO_URL} &&
+              git clone ${REPO_URL}.git &&
               cd ${REPO_NAME} &&
 
               echo Generate cert files &&
