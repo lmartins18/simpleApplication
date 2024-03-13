@@ -7,4 +7,4 @@ COPY ["package.json", "package-lock.json*", "./"]
 RUN npm install
 RUN npm install pm2 -g
 COPY . .
-CMD ["pm2-runtime", "bin/www"]
+CMD ["pm2", "start", "bin/www"]
