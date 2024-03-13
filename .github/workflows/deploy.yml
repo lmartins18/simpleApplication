@@ -48,6 +48,10 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
           SSH_USER: ${{ secrets.USER_NAME }}
+          DOCKER_USERNAME:  ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_TOKEN:  ${{ secrets.DOCKER_TOKEN }}
+          DOCKER_IMAGE: ${{ secrets.DOCKER_IMAGE }}
+          BUILD_NUMBER: ${{ github.run_number }}
         run: |
           mkdir -p ~/.ssh/
           echo "${SSH_KEY}" > ~/.ssh/deploy.key
