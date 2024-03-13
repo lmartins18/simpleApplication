@@ -71,4 +71,4 @@ jobs:
         run: ssh deploy "sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Run Docker image
-        run: ssh deploy "sudo docker run -p 8443:8443 ${DOCKER_IMAGE}"
+        run: ssh deploy "sudo docker run -p 8443:8443 ${DOCKER_IMAGE}:${BUILD_NUMBER}"
