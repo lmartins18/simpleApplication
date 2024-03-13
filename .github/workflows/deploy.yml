@@ -73,4 +73,4 @@ jobs:
       - name: Run Docker container
         run: |
           ssh deploy "sudo docker stop simple-application || true"
-          ssh deploy "docker run --name ${DOCKER_IMAGE} --rm -dp 8443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+          ssh deploy "sudo docker run --name ${DOCKER_IMAGE} --rm -dp 8443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
