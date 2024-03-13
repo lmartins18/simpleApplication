@@ -62,12 +62,13 @@ jobs:
             User ${SSH_USER}
             IdentityFile ~/.ssh/deploy.key
             StrictHostKeyChecking no
-
           END
+
       - name: Ensure docker is installed
         run: ssh deploy 'bash -s' < ./aws/scripts/install_docker.sh
+
       - name: Pull Docker image
-        run: ssh deploy "docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+        run: ssh deploy "sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Run Docker image
-        run: ssh deploy "docker run -p 8443:8443 ${DOCKER_IMAGE}"
+        run: ssh deploy "sudo docker run -p 8443:8443 ${DOCKER_IMAGE}"
