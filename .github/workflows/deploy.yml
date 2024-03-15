@@ -30,6 +30,7 @@ jobs:
 
   Build:            
     name: Build
+    needs: Security
     runs-on: ubuntu-latest
     env: 
       PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
