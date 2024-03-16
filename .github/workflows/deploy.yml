@@ -48,17 +48,17 @@ jobs:
     name: Deploy
     needs: Build
     runs-on: ubuntu-latest
+    env:
+      SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_USER: ${{ secrets.SSH_USER }}
+      PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      SERVER: ${{ secrets.SERVER }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Configure EC2 SSH
-        env:
-          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          SERVER: ${{ secrets.SERVER }}
         run: |
           mkdir -p ~/.ssh/
           echo "${SSH_KEY}" > ~/.ssh/deploy.key
@@ -84,8 +84,8 @@ jobs:
 
       - name: Create Docker container
         run: |
-          ssh deploy "docker stop ${DOCKER_IMAGE} || true"
-          ssh deploy "docker create --name ${DOCKER_IMAGE} --rm -p 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+          ssh deploy "docker stop ${DOCKER_IMAGE} || true && docker rm ${DOCKER_IMAGE} || true"
+          ssh deploy "docker create --name ${DOCKER_IMAGE} -p 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Add SSL Cert. to instance
         run: |
