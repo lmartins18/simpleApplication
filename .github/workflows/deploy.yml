@@ -82,12 +82,15 @@ jobs:
           ssh deploy "echo ${PRIVATE_KEY} > privatekey.pem"
           ssh deploy "echo ${SERVER} > server.crt"
 
-      - name: Run Docker container
+      - name: Create Docker container
         run: |
           ssh deploy "docker stop ${DOCKER_IMAGE} || true"
-          ssh deploy "docker run --name ${DOCKER_IMAGE} --rm -dp 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+          ssh deploy "docker create --name ${DOCKER_IMAGE} --rm -p 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Add SSL Cert. to instance
         run: |
           ssh deploy "docker cp ./privatekey.pem ${DOCKER_IMAGE}:/privatekey.pem"
           ssh deploy "docker cp ./server.crt ${DOCKER_IMAGE}:/server.crt"
+
+      - name: Run docker container
+        run: ssh deploy "docker start ${DOCKER_IMAGE}"
