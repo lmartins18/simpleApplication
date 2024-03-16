@@ -75,7 +75,7 @@ jobs:
         run: ssh deploy 'bash -s' < ./aws/scripts/install_docker.sh
 
       - name: Pull Docker image
-        run: ssh deploy "sudo docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
+        run: ssh deploy "docker pull ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Get certificate
         run: | 
@@ -84,7 +84,7 @@ jobs:
 
       - name: Run Docker container
         run: |
-          ssh deploy "docker stop simple-application || true"
+          ssh deploy "docker stop ${DOCKER_IMAGE} || true"
           ssh deploy "docker run --name ${DOCKER_IMAGE} --rm -dp 443:8443 ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${BUILD_NUMBER}"
       
       - name: Add SSL Cert. to instance
