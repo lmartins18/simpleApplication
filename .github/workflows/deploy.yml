@@ -56,7 +56,7 @@ jobs:
         env:
           SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_USER: ${{ secrets.USER_NAME }}
+          SSH_USER: ${{ secrets.SSH_USER }}
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           SERVER: ${{ secrets.SERVER }}
         run: |
@@ -79,8 +79,8 @@ jobs:
       
       - name: Get certificate
         run: | 
-          echo ${PRIVATE_KEY} > privatekey.pem
-          echo ${SERVER} > server.crt
+          ssh deploy "echo ${PRIVATE_KEY} > privatekey.pem"
+          ssh deploy "echo ${SERVER} > server.crt"
 
       - name: Run Docker container
         run: |
